@@ -1,4 +1,5 @@
 import cv2
+import matplotlib.pyplot as plt
 
 
 def matrix_to_vector(image):
@@ -10,11 +11,15 @@ def matrix_to_vector(image):
     return image.flatten()
 
 
+def image_gray(image):
+    return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+
+
 def resize_region(region):
     """
     Transformisati selektovani region na sliku dimenzija 28x28
     """
-    return cv2.resize(region, (28, 28), interpolation=cv2.INTER_NEAREST)
+    return cv2.resize(region, (64, 64), interpolation=cv2.INTER_NEAREST)
 
 
 def load_image(path):
@@ -49,6 +54,7 @@ def get_face(image, x, y, w, h):
     :return: region spreman za neuronsku mrezu (faca lika)
     """
     region = image[y:y + h + 1, x:x + w + 1]
+    # region = image_gray(region)
     region = scale_to_range(region)
     region = resize_region(region)
     return region

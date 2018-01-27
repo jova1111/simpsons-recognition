@@ -1,4 +1,5 @@
 from src import image_utils, neural_network_training as nn
+from keras.utils import to_categorical
 import numpy as np
 
 
@@ -16,6 +17,8 @@ character_map = {'abraham_grampa_simpson': 0, 'apu_nahasapeemapetilon': 1, 'bart
                  'marge_simpson': 11, 'milhouse_van_houten': 12, 'moe_szyslak': 13,
                  'ned_flanders': 14, 'nelson_muntz': 15, 'principal_skinner': 16, 'sideshow_bob': 17}
 
+reversed_character_map = dict(reversed(item) for item in character_map.items())
+
 
 def parse_coordinates_and_create_ready_regions():
     with open(coordinates_txt_file) as coordinates_file:
@@ -24,7 +27,7 @@ def parse_coordinates_and_create_ready_regions():
     for line in lines:
         image_path, x, y, w, h, character_name = parse_coordinates_line(line)
         image = image_utils.load_image(img_folder_prefix + image_path)
-        ready_regions.append(image_utils.matrix_to_vector(image_utils.get_face(image, int(x), int(y), int(w), int(h))))
+        ready_regions.append(image_utils.get_face(image, int(x), int(y), int(w), int(h)))
         region_data.append(character_map[character_name])
 
 
@@ -43,16 +46,21 @@ def parse_coordinates_line(line):
 def create_network():
     parse_coordinates_and_create_ready_regions()
     ann = nn.create_ann()
-    ann = nn.train_ann(ann, ready_regions, region_data)
-    ann.save('neural_network.h5')
+    ann = nn.train_ann(ann, ready_regions, to_categorical(region_data))
+    ann.save('neural_network_multiple_layers.h5')
 
 
 def test_network():
-    image_test = image_utils.load_image(img_folder_prefix + "comic_book_guy/pic_0156.jpg")
-    test_region = [image_utils.matrix_to_vector(image_utils.get_face(image_test, 115, 3, 317, 289))]
-    ann = nn.load_model('../neural_network.h5')
+    image_test = image_utils.load_image("/home/jova/Desktop" + "/bart.jpeg")
+    region = image_utils.get_face(image_test, 0, 0, 279, 305)
+    image_utils.display_image(region)
+    test_region = [region]
+    ann = nn.load_model('neural_network_multiple_layers.h5')
     outputs = ann.predict(np.array(test_region))
-    print(nn.get_result(outputs))
+    result = nn.get_result(outputs)
+    print(reversed_character_map[result[0]], reversed_character_map[result[1]], reversed_character_map[result[2]],
+          reversed_character_map[result[3]], reversed_character_map[result[4]])
+    print(outputs)
 
 
 # create_network()
