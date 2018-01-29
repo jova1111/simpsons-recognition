@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 def matrix_to_vector(image):
     """
-    Sliku koja je zapravo matrica 28x28 transformisati u vektor sa 784 elementa
+    Sliku transformise u vektor
     :param image: slika koja se pretvara u vektor
     :return: vektor slike
     """
@@ -12,21 +12,40 @@ def matrix_to_vector(image):
 
 
 def image_gray(image):
+    """
+    Vraca sliku u nijansama sive
+    :param image: slika koja se pretvara u sivu
+    :return: sivu sliku
+    """
     return cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
 
 def resize_region(region):
     """
-    Transformisati selektovani region na sliku dimenzija 28x28
+    Transformisati selektovani region na sliku dimenzija 64x64
+
+    :param region: region koji se transformise
+    :return: transformisan region
     """
     return cv2.resize(region, (64, 64), interpolation=cv2.INTER_NEAREST)
 
 
 def load_image(path):
+    """
+    Ucitava sliku.
+    :param path: putanja do slike koja se ucitava
+    :return: ucitana slika
+    """
     return cv2.cvtColor(cv2.imread(path), cv2.COLOR_BGR2RGB)
 
 
 def display_image(image, color=False):
+    """
+    Prikazuje sliku.
+    :param image: slika koja se prikazuje
+    :param color: govori da li prikazati sliku u boji ili crno-belu
+    :return:
+    """
     if color:
         plt.imshow(image)
         plt.show()
