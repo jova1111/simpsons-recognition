@@ -47,7 +47,7 @@ def create_network():
     parse_coordinates_and_create_ready_regions()
     ann = nn.create_ann()
     ann = nn.train_ann(ann, ready_regions, to_categorical(region_data))
-    ann.save('neural_network_multiple_layers.h5')
+    ann.save('neural_network_multiple_layers_whole_picture.h5')
 
 
 def test_network():
@@ -55,7 +55,7 @@ def test_network():
     region = image_utils.get_face(image_test, 0, 0, 279, 305)
     image_utils.display_image(region)
     test_region = [region]
-    ann = nn.load_model('neural_network_multiple_layers.h5')
+    ann = nn.load_model('neural_network_multiple_layers_whole_picture.h5')
     outputs = ann.predict(np.array(test_region))
     result = nn.get_result(outputs)
     print(reversed_character_map[result[0]], reversed_character_map[result[1]], reversed_character_map[result[2]],
@@ -63,5 +63,5 @@ def test_network():
     print(outputs)
 
 
-# create_network()
-test_network()
+create_network()
+# test_network()

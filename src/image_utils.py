@@ -53,8 +53,8 @@ def get_face(image, x, y, w, h):
     :param h: visina koja se uzima od y
     :return: region spreman za neuronsku mrezu (faca lika)
     """
-    region = image[y:y + h + 1, x:x + w + 1]
+    # region = image[y:y + h + 1, x:x + w + 1]
     # region = image_gray(region)
-    region = scale_to_range(region)
+    region = scale_to_range(image)
     region = resize_region(region)
     return region
