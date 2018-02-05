@@ -10,30 +10,12 @@ from keras.models import load_model
 
 def create_ann():
     """
-    Implementacija vestacke neuronske mreze sa 784 neurona na uloznom sloju,
+    Implementacija vestacke neuronske mreze sa 12288 (64x64x3) neurona na uloznom sloju,
     128 neurona u skrivenom sloju i 18 neurona na izlazu. Aktivaciona funkcija je sigmoid.
     """
     model = Sequential()
-    model.add(Conv2D(32, (3, 3), padding='same', input_shape=(64, 64, 3)))
-    model.add(Activation('relu'))
-    model.add(Conv2D(32, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Conv2D(64, (3, 3), padding='same'))
-    model.add(Activation('relu'))
-    model.add(Conv2D(64, (3, 3)))
-    model.add(Activation('relu'))
-    model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Dropout(0.25))
-
-    model.add(Flatten())
-    model.add(Dense(512))
-    model.add(Activation('relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(18))
-    model.add(Activation('softmax'))
+    model.add(Dense(128, input_dim=12288, activation='sigmoid'))
+    model.add(Dense(18, activation='sigmoid'))
     return model
 
 
@@ -60,9 +42,11 @@ def train_ann(ann, x_train, y_train):
 
 def get_result(outputs):  # output je vektor sa izlaza neuronske mreze
     """
-    pronaci i vratiti indekse 3 neurona koji su najvise pobudjeni
+    pronaci i vratiti indekse 5 neurona koji su najvise pobudjeni
+
+    :param outputs: rezultati iz mreze (neuroni)
+    :return: indeksi 5 najvise pobudjenih neurona
     """
     arr = outputs[0]
 
     return heapq.nlargest(5, range(len(arr)), arr.__getitem__)
-    # return max(enumerate(outputs[0]), key=operator.itemgetter(1))
