@@ -1,6 +1,5 @@
 # coding=utf-8
 from src import image_utils, neural_network_training as nn
-from keras.utils import to_categorical
 import numpy as np
 import cv2
 
@@ -46,33 +45,32 @@ def parse_coordinates_line(line):
     return path_to_image, x1, x2, y1, y2, character_name
 
 
-def create_network():
+def make_network():
     parse_coordinates_and_create_ready_regions()
-    ann = nn.create_ann()
-    ann = nn.train_ann(ann, ready_regions, to_categorical(region_data))
-    ann.save('neural_network_multiple_layers_whole_picture.h5')
+    nn.create_network(ready_regions, region_data)
 
 
-def test_network():
-    image_test = image_utils.load_image("/home/jova/Desktop" + "/bart.jpeg")
-    region = image_utils.get_face(image_test, 0, 0, 279, 305)
-    image_utils.display_image(region)
+def test_network(img):
+    region = image_utils.get_face(img, 0, 0, 279, 305)
+    # image_utils.display_image(region)
     test_region = [region]
-    ann = nn.load_model('neural_network_multiple_layers_whole_picture.h5')
+    ann = nn.load_model('neural_network_multiple_layers.h5')
     outputs = ann.predict(np.array(test_region))
     result = nn.get_result(outputs)
     print(reversed_character_map[result[0]], reversed_character_map[result[1]], reversed_character_map[result[2]],
           reversed_character_map[result[3]], reversed_character_map[result[4]])
-    print(outputs)
 
 
 def test_roi():
     image_color = cv2.imread("/home/jova/Desktop" + "/bart.png")
     image_binary = image_bin(image_gray(yellow_only_image(image_color)))
-    selected_regions, letters, region_distances = select_roi(image_color, image_binary)
-    display_image(selected_regions)
+    selected_regions, faces = select_roi(image_color, image_binary)
+    display_image(cv2.cvtColor(selected_regions, cv2.COLOR_BGR2RGB))
+    for face in faces:
+        display_image(face)
+        test_network(face)
 
 
-# create_network()
+# make_network()
 # test_network()
 test_roi()

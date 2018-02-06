@@ -1,21 +1,39 @@
 import numpy as np
-import operator
 import heapq
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation
 from keras.layers import Conv2D, MaxPooling2D, Dropout,Flatten
 from keras.optimizers import SGD
+from keras.utils import to_categorical
 from keras.models import load_model
 
 
-def create_ann():
+def create_model():
     """
     Implementacija vestacke neuronske mreze sa 12288 (64x64x3) neurona na uloznom sloju,
     128 neurona u skrivenom sloju i 18 neurona na izlazu. Aktivaciona funkcija je sigmoid.
     """
     model = Sequential()
-    model.add(Dense(128, input_dim=12288, activation='sigmoid'))
-    model.add(Dense(18, activation='sigmoid'))
+    model.add(Conv2D(32, (3, 3), padding='same', input_shape=(64, 64, 3)))
+    model.add(Activation('relu'))
+    model.add(Conv2D(32, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Conv2D(64, (3, 3), padding='same'))
+    model.add(Activation('relu'))
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
+    model.add(Dropout(0.25))
+
+    model.add(Flatten())
+    model.add(Dense(512))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(18))
+    model.add(Activation('softmax'))
     return model
 
 
@@ -38,6 +56,12 @@ def train_ann(ann, x_train, y_train):
     ann.fit(x_train, y_train, epochs=200, batch_size=32, verbose=1, shuffle=False)
 
     return ann
+
+
+def create_network(ready_regions, region_data):
+    ann = create_model()
+    ann = train_ann(ann, ready_regions, to_categorical(region_data))
+    ann.save('neural_network_multiple_layers_whole_picture.h5')
 
 
 def get_result(outputs):  # output je vektor sa izlaza neuronske mreze
