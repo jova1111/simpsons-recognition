@@ -1,7 +1,10 @@
+# coding=utf-8
 from src import image_utils, neural_network_training as nn
 from keras.utils import to_categorical
 import numpy as np
+import cv2
 
+from src.image_utils import resize_region, image_gray, image_bin, display_image, yellow_only_image, select_roi
 
 img_folder_prefix = '/mnt/9ac208b6-a6e2-42be-8447-2652b7190e9b/Downloads/simspons dataset/dataset/simpsons_dataset/'
 
@@ -63,5 +66,13 @@ def test_network():
     print(outputs)
 
 
-create_network()
+def test_roi():
+    image_color = cv2.imread("/home/jova/Desktop" + "/bart.png")
+    image_binary = image_bin(image_gray(yellow_only_image(image_color)))
+    selected_regions, letters, region_distances = select_roi(image_color, image_binary)
+    display_image(selected_regions)
+
+
+# create_network()
 # test_network()
+test_roi()
