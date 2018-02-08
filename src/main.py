@@ -26,11 +26,24 @@ def parse_coordinates_and_create_ready_regions():
     with open(coordinates_txt_file) as coordinates_file:
         lines = coordinates_file.readlines()
 
+    counter_faces = 0
+    counter_no_faces = 0
     for line in lines:
+
         image_path, x, y, w, h, character_name = parse_coordinates_line(line)
-        image = image_utils.load_image(img_folder_prefix + image_path)
-        ready_regions.append(image_utils.get_face(image, int(x), int(y), int(w), int(h)))
-        region_data.append(character_map[character_name])
+        image_color = cv2.imread(img_folder_prefix + image_path)
+        # ready_regions.append(image_utils.get_face(image, int(x), int(y), int(w), int(h)))
+        image_binary = image_bin(image_gray(yellow_only_image(image_color)))
+        selected_regions, faces = select_roi(image_color, image_binary)
+        if len(faces) > 0:
+            counter_faces += 1
+            ready_regions.append(image_utils.get_face(faces[0], 0, 0, 0, 0))
+            region_data.append(character_map[character_name])
+        else:
+            counter_no_faces += 1
+
+    print('Faces ' + str(counter_faces))
+    print('No faces ' + str(counter_no_faces))
 
 
 def parse_coordinates_line(line):
@@ -52,9 +65,9 @@ def make_network():
 
 def test_network(img):
     region = image_utils.get_face(img, 0, 0, 279, 305)
-    # image_utils.display_image(region)
+    image_utils.display_image(region)
     test_region = [region]
-    ann = nn.load_model('neural_network_multiple_layers.h5')
+    ann = nn.load_model('neural_network_roi.h5')
     outputs = ann.predict(np.array(test_region))
     result = nn.get_result(outputs)
     print(reversed_character_map[result[0]], reversed_character_map[result[1]], reversed_character_map[result[2]],
@@ -62,7 +75,7 @@ def test_network(img):
 
 
 def test_roi():
-    image_color = cv2.imread("/home/jova/Desktop" + "/bart.png")
+    image_color = cv2.imread("/home/jova/Desktop/bart.png")
     image_binary = image_bin(image_gray(yellow_only_image(image_color)))
     selected_regions, faces = select_roi(image_color, image_binary)
     display_image(cv2.cvtColor(selected_regions, cv2.COLOR_BGR2RGB))

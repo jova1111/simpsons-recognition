@@ -61,7 +61,7 @@ def train_ann(ann, x_train, y_train):
 def create_network(ready_regions, region_data):
     ann = create_model()
     ann = train_ann(ann, ready_regions, to_categorical(region_data))
-    ann.save('neural_network_multiple_layers_whole_picture.h5')
+    ann.save('neural_network_roi.h5')
 
 
 def get_result(outputs):  # output je vektor sa izlaza neuronske mreze

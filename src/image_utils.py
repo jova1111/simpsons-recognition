@@ -23,11 +23,8 @@ def image_gray(image):
 
 def image_bin(image_gs):
     ret, image_bin = cv2.threshold(image_gs, 127, 255, cv2.THRESH_BINARY)
-    return image_bin
-
-
-def image_white(image_gs):
-    ret, image_bin = cv2.threshold(image_gs, 254, 255, cv2.THRESH_BINARY)
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))  # MORPH_ELIPSE, MORPH_RECT...
+    image_bin = cv2.dilate(image_bin, kernel, iterations=5)
     return image_bin
 
 
@@ -103,17 +100,32 @@ def select_roi(image_orig, image_binary):
     :return: originalna slika sa regionima, sortirani regioni, rastojanja izmedju regiona
     """
     img, contours, hierarchy = cv2.findContours(image_binary.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    # Nacin odredjivanja kontura je promenjen na spoljasnje konture: cv2.RETR_EXTERNAL
+    # Nacin odredjivanja kontjura e promenjen na spoljasnje konture: cv2.RETR_EXTERNAL
     regions_color = []
     original_color_image = image_orig.copy()
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
         if w < 30 or h < 30 or float(w)/float(h) > 1.5:
             continue
+
+        reg = original_color_image[y:y + h + 1, x:x + w + 1]
+        reg = cv2.cvtColor(reg, cv2.COLOR_BGR2RGB)
+        gray = image_gray(reg)
+
+        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 20, param1=30, param2=15, minRadius=0, maxRadius=0)
+        if circles is None:
+            continue
+
         region = cv2.cvtColor(original_color_image[y:y + h + 1, x:x + w + 1], cv2.COLOR_BGR2RGB)
-        if np.any(image_white(image_gray(region)) == 255):
-            regions_color.append(region)
-            cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
+        regions_color.append(region)
+        cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        circles = np.uint16(np.around(circles))
+
+        for i in circles[0, :]:
+
+            cv2.circle(reg, (i[0], i[1]), i[2], (0, 255, 0), 2)
+        display_image(reg)
 
     return image_orig, regions_color
 
