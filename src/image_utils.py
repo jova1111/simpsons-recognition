@@ -81,7 +81,7 @@ def scale_to_range(image):  # skalira elemente slike na opseg od 0 do 1
 def get_face(image):
     """
     Vraca spreman region za neuroznsku mrezu.
-    
+
     :param image: slika sa koje se uzima lik karaktera
     :return: region spreman za neuronsku mrezu (faca lika)
     """

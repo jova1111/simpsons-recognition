@@ -3,6 +3,8 @@ from src import image_utils, neural_network_training as nn
 import numpy as np
 import os
 import cv2
+from optparse import OptionParser
+import sys
 
 from src.image_utils import image_gray, image_bin, yellow_only_image, select_roi
 
@@ -126,14 +128,14 @@ def recognise_faces(image_color, frame_number):
         cv2.imwrite('frame%d.jpg' % frame_number, image_color)
 
 
-def capture_video():
+def capture_video(path_to_video):
     """
     Uzima video snimak i salje svaki deseti frejm funkciji za prepoznavanje likova
 
     :return:
     """
     os.environ['CUDA_VISIBLE_DEVICES'] = ''  # iskljuci GPU i koristi CPU za prepoznavanje
-    cap = cv2.VideoCapture('/home/jova/Videos/simp06.mp4')
+    cap = cv2.VideoCapture(path_to_video)
     count_when_to_take_frame = 0  # brojac koji sluzi da se prepozna svaki deseti frejm
     count_frame_number = 0  # brojac uzetih frejmova
     while cap.isOpened():
@@ -152,4 +154,9 @@ def capture_video():
 
 
 # make_network()
-capture_video()
+
+if len(sys.argv) < 2:
+    print('Niste uneli potreban broj argumenata (1)')
+else:
+    path_to_videofile = sys.argv[1]
+    capture_video(path_to_videofile)
