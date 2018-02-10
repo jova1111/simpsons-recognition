@@ -59,14 +59,21 @@ def train_ann(ann, x_train, y_train):
 
 
 def create_network(ready_regions, region_data):
+    """
+    Trenira neuronsku mrezu i cuva je na disk.
+
+    :param ready_regions: Regioni slika koji se koriste za ulaz u mrezu.
+    :param region_data: Indeksi likova koji predstavljaju zeljeni izlaz iz mreze
+    :return:
+    """
     ann = create_model()
     ann = train_ann(ann, ready_regions, to_categorical(region_data))
-    ann.save('neural_network_roi.h5')
+    ann.save('neural_network_roi_dilated.h5')
 
 
 def get_result(outputs):  # output je vektor sa izlaza neuronske mreze
     """
-    pronaci i vratiti indekse 5 neurona koji su najvise pobudjeni
+    Pronaci i vratiti indekse 5 neurona koji su najvise pobudjeni
 
     :param outputs: rezultati iz mreze (neuroni)
     :return: indeksi 5 najvise pobudjenih neurona

@@ -22,6 +22,12 @@ def image_gray(image):
 
 
 def image_bin(image_gs):
+    """
+    Pravi binarnu sliku.
+
+    :param image_gs: slika koja ce biti pretvorena u binarnu, dilate takodje primenjeno
+    :return: binarna slika
+    """
     ret, image_bin = cv2.threshold(image_gs, 127, 255, cv2.THRESH_BINARY)
     kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))  # MORPH_ELIPSE, MORPH_RECT...
     image_bin = cv2.dilate(image_bin, kernel, iterations=5)
@@ -72,14 +78,11 @@ def scale_to_range(image):  # skalira elemente slike na opseg od 0 do 1
     return image / 255.0
 
 
-def get_face(image, x, y, w, h):
+def get_face(image):
     """
     Vraca spreman region za neuroznsku mrezu.
+    
     :param image: slika sa koje se uzima lik karaktera
-    :param x: x koordinata
-    :param y: y koordinata
-    :param w: sirina koja se uzima od x
-    :param h: visina koja se uzima od y
     :return: region spreman za neuronsku mrezu (faca lika)
     """
     # region = image[y:y + h + 1, x:x + w + 1]
@@ -91,43 +94,28 @@ def get_face(image, x, y, w, h):
 
 def select_roi(image_orig, image_binary):
     """
-    Funkcija kao u vezbi 2, iscrtava pravougaonike na originalnoj slici,
-    pronalazi sortiran niz regiona sa slike,
-    i dodatno treba da sacuva rastojanja izmedju susednih regiona.
+    Iscrtava pravougaonike na originalnoj slici i vraca prepoznate regione.
 
     :param image_orig: slika u boji na kojoj ce se iscrtati regioni
-    :param image_bin: binarna slika sa koje se izdvajaju regioni
-    :return: originalna slika sa regionima, sortirani regioni, rastojanja izmedju regiona
+    :param image_binary: binarna slika sa koje se izdvajaju regioni
+    :return: originalna slika sa regionima, izdvojeni regioni, koordinate pravougaonika za svaki region
     """
     img, contours, hierarchy = cv2.findContours(image_binary.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     # Nacin odredjivanja kontjura e promenjen na spoljasnje konture: cv2.RETR_EXTERNAL
     regions_color = []
     original_color_image = image_orig.copy()
+    rectangle_coordinates = []  # koordinate pravougaonika koji ce se iscrtati za reigon
     for contour in contours:
         x, y, w, h = cv2.boundingRect(contour)
-        if w < 30 or h < 30 or float(w)/float(h) > 1.5:
-            continue
-
-        reg = original_color_image[y:y + h + 1, x:x + w + 1]
-        reg = cv2.cvtColor(reg, cv2.COLOR_BGR2RGB)
-        gray = image_gray(reg)
-
-        circles = cv2.HoughCircles(gray, cv2.HOUGH_GRADIENT, 1, 20, param1=30, param2=15, minRadius=0, maxRadius=0)
-        if circles is None:
+        if w < 50 or h < 50 or float(w)/float(h) > 1.5:  # izbaci regione koji su previse uzani ili previse niski
             continue
 
         region = cv2.cvtColor(original_color_image[y:y + h + 1, x:x + w + 1], cv2.COLOR_BGR2RGB)
         regions_color.append(region)
+        rectangle_coordinates.append([x, y, w, h])
         cv2.rectangle(image_orig, (x, y), (x + w, y + h), (0, 255, 0), 2)
 
-        circles = np.uint16(np.around(circles))
-
-        for i in circles[0, :]:
-
-            cv2.circle(reg, (i[0], i[1]), i[2], (0, 255, 0), 2)
-        display_image(reg)
-
-    return image_orig, regions_color
+    return image_orig, regions_color, rectangle_coordinates
 
 
 def yellow_only_image(img):
